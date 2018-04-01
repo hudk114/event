@@ -1,0 +1,22 @@
+{
+  "name": "@hudk/event",
+  "version": "0.0.1",
+  "description": "simple event implement",
+  "main": "event.js",
+  "scripts": {
+    "test": "node ./test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hudk114/event.js.git"
+  },
+  "keywords": [
+    "event"
+  ],
+  "author": "hudk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hudk114/event.js/issues"
+  },
+  "homepage": "https://github.com/hudk114/event.js#readme"
+}
