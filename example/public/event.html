@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>event</title>
+</head>
+<body>
+  <header>event</header>
+
+  <ol>
+    <li>
+      <b>import</b>
+      <pre>
+        <code>
+          // js引入
+          var Event = window.event;
+          
+          // cjs
+          const Event = require('@hudk/event');
+
+          // es6
+          import Event from '@hudk/event';
+        </code>
+      </pre>
+    </li>
+    <li>
+      <b>simple usage</b>
+      <pre>
+        <code>
+          var e = new Event();
+
+          e.once('simple', _ => {
+            console.log('once will only be triggered once!');
+          });
+          e.on('simple', _ => {
+            console.log('on will always be triggered!')
+          });
+          e.trigger('simple');
+          e.trigger('simple');
+          
+          // trigger msg
+          e.on('msg', val => {
+            console.log(val.name);
+          });
+          e.trigger('msg', { name: 'hudk' });
+        </code>
+        <button class="button">open your console and click</button>
+      </pre>
+    </li>
+    <li>
+      <b>bind this</b>
+      <pre>
+        <code>
+          var e = new Event();
+          var obj = {
+            prop: 3,
+            func () {
+              console.log(this);
+            }
+          };
+
+          // event will lose this
+          e.once('bind', obj.func);
+          // simple way to bind this
+          e.once('bind', obj.func, obj);
+          // another way to bind this
+          e.once('bind', obj.func.bind(obj));
+          e.on('bind', obj.func);
+          e.on('bind', obj.func, obj);
+          e.on('bind', obj.func.bind(obj));
+          e.trigger('bind');
+          e.trigger('bind');
+        </code>
+        <button class="button">open your console and click</button>
+      </pre>
+    </li>
+    <li>
+      <b>Event.stop</b>
+      <pre>
+        <code>
+          var e = new Event();
+
+          e.once('stop', _ => {
+            console.log('this event would trigger once, and prevent other callback!');
+            e.stop('stop');
+          });
+          e.on('stop', _ => {
+            console.log('this event would be triggered on the second time;')
+          });
+          // e.on won't be triggered this time
+          e.trigger('stop');
+          // e.on will be triggered this time
+          e.trigger('stop');
+        </code>
+        <button class="button">open your console and click</button>
+      </pre>
+    </li>
+  </ol>
+
+  <script src="/js/event.js"></script>
+  <script src="/js/code2scirpt.js"></script>
+  <script>
+    var Event = window.event;
+
+    document.body.addEventListener('click', function (event) {
+      var ele = event.target;
+      if (!(ele.attributes.class && ele.attributes.class.textContent.indexOf('button') > -1)) {
+        return;
+      }
+
+      code2script(ele.parentElement.getElementsByTagName('code')[0].textContent);
+    });
+  </script>
+</body>
+</html>

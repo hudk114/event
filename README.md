@@ -2,14 +2,14 @@
 simple event implement
 
 ## import
-npm install --save @hudk/event
+npm install -S @hudk/event
 
 ## usage
 
     var Event = require('@hudk/event');
     var e = new Event();
 
-## funcions
+## api
 ### trigger(eventName, [message])
 trigger event
 
