@@ -4,8 +4,10 @@
   (global.event = factory());
 }(this, (function () { 'use strict';
 
-  function Event() {
+  function Event(prepare) {
     this.pool = {};
+    // prepare function is used for prepare key
+    this.prepare = prepare;
   }
 
   function E(cb, once) {
@@ -14,14 +16,27 @@
     // 用于单次事件
     this.done = false;
   }
+
   var judgeFunction = function judgeFunction(f) {
     return typeof f === 'function';
   };
 
   Event.prototype = {
     constructor: Event,
-    // 有的话直接返回，没有的话创建一个
+    setPrepare: function setPrepare(prepare) {
+      this.prepare = prepare;
+    },
     _getPool: function _getPool(eventName) {
+      var c = typeof this.prepare === 'function' ? this.prepare : function (a, b) {
+        return a === b;
+      };
+
+      for (var key in this.pool) {
+        if (this.pool.hasOwnProperty(key) && c(key, eventName)) {
+          return this.pool[key];
+        }
+      }
+
       if (!this.pool[eventName]) {
         this.pool[eventName] = {
           stop: true,
@@ -31,14 +46,26 @@
       return this.pool[eventName];
     },
 
+    // 有的话直接返回，没有的话创建一个
+    _createPool: function _createPool(eventName) {
+      if (!this._getPool(eventName)) {
+        this.pool[eventName] = {
+          stop: true,
+          list: []
+        };
+      }
+      return this._getPool(eventName);
+    },
+
     // 注册触发多次的函数
     on: function on(eventName, cb, ctx) {
       if (!judgeFunction(cb)) {
         return;
       }
 
-      this._getPool(eventName).list.push(new E(cb.bind(ctx), false));
-      return this;
+      var f = new E(cb.bind(ctx), false);
+      this._createPool(eventName).list.push(f);
+      return f;
     },
 
     // 注册触发一次的函数
@@ -47,13 +74,14 @@
         return;
       }
 
-      this._getPool(eventName).list.push(new E(cb.bind(ctx), true));
-      return this;
+      var f = new E(cb.bind(ctx), true);
+      this._createPool(eventName).list.push(f);
+      return f;
     },
 
     // 触发函数并传递options
     trigger: function trigger(eventName, msg) {
-      var p = this.pool[eventName];
+      var p = this._getPool(eventName);
       var f = null;
       if (!p) {
         return;
@@ -83,12 +111,23 @@
 
     // stop event trigger
     stop: function stop(eventName) {
-      var p = this.pool[eventName];
+      var p = this._getPool(eventName);
       if (!p) {
         return;
       }
 
       p.stop = true;
+    },
+
+    // remove selected event
+    remove: function remove(eventName, e) {
+      var i = this._getPool(eventName).list.findIndex(function (f) {
+        return f === e;
+      });
+      if (i < 0) {
+        return null;
+      }
+      this._getPool(eventName).list.splice(i, 1);
     }
   };
 

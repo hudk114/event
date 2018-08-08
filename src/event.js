@@ -1,5 +1,7 @@
-function Event () {
+function Event (prepare) {
   this.pool = {};
+  // prepare function is used for prepare key
+  this.prepare = prepare;
 }
 
 function E (cb, once) {
@@ -15,8 +17,18 @@ var judgeFunction = function (f) {
 
 Event.prototype = {
   constructor: Event,
-  // 有的话直接返回，没有的话创建一个
+  setPrepare (prepare) {
+    this.prepare = prepare;
+  },
   _getPool (eventName) {
+    var c = typeof this.prepare === 'function' ? this.prepare : function (a, b) { return a === b; };
+
+    for (const key in this.pool) {
+      if (this.pool.hasOwnProperty(key) && c(key, eventName)) {
+        return this.pool[key];
+      }
+    }
+
     if (!this.pool[eventName]) {
       this.pool[eventName] = {
         stop: true,
@@ -25,14 +37,25 @@ Event.prototype = {
     }
     return this.pool[eventName];
   },
+  // 有的话直接返回，没有的话创建一个
+  _createPool (eventName) {
+    if (!this._getPool(eventName)) {
+      this.pool[eventName] = {
+        stop: true,
+        list: []
+      };
+    }
+    return this._getPool(eventName);
+  },
   // 注册触发多次的函数
   on (eventName, cb, ctx) {
     if (!judgeFunction(cb)) {
       return;
     }
 
-    this._getPool(eventName).list.push(new E(cb.bind(ctx), false));
-    return this;
+    var f = new E(cb.bind(ctx), false);
+    this._createPool(eventName).list.push(f);
+    return f;
   },
   // 注册触发一次的函数
   once (eventName, cb, ctx) {
@@ -40,12 +63,13 @@ Event.prototype = {
       return;
     }
 
-    this._getPool(eventName).list.push(new E(cb.bind(ctx), true));
-    return this;
+    var f = new E(cb.bind(ctx), true)
+    this._createPool(eventName).list.push(f);
+    return f;
   },
   // 触发函数并传递options
   trigger (eventName, msg) {
-    var p = this.pool[eventName];
+    var p = this._getPool(eventName);
     var f = null;
     if (!p) {
       return;
@@ -72,12 +96,20 @@ Event.prototype = {
   },
   // stop event trigger
   stop (eventName) {
-    var p = this.pool[eventName];
+    var p = this._getPool(eventName);
     if (!p) {
       return;
     }
 
     p.stop = true;
+  },
+  // remove selected event
+  remove (eventName, e) {
+    let i = this._getPool(eventName).list.findIndex(f => f === e);
+    if (i < 0) {
+      return null;
+    }
+    this._getPool(eventName).list.splice(i, 1);
   }
 };
 

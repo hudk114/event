@@ -97,6 +97,57 @@
         <button class="button">open your console and click</button>
       </pre>
     </li>
+    <li>
+      <b>Event.remove</b>
+      <pre>
+        <code>
+          var e = new Event();
+
+          var k = e.on('remove', _ => {
+            console.log('this event would trigger twice!');
+          });
+
+          e.trigger('remove');
+          e.trigger('remove');
+
+          console.log('remvove the event;');
+
+          e.remove('remove', k);
+          e.trigger('remove');
+        </code>
+        <button class="button">open your console and click</button>
+      </pre>
+    </li>
+    <li>
+      <b>use no string key</b>
+      <pre>
+        <code>
+          var e = new Event();
+          e.setPrepare(function (a, b) {
+            for (const key in a) {
+              if (a.hasOwnProperty(key)) {
+                if (a[key] !== b[key]) return false;
+              }
+            }
+          
+            for (const key in b) {
+              if (b.hasOwnProperty(key)) {
+                if (a[key] !== b[key]) return false;
+              }
+            }
+          
+            return true;
+          });
+
+          var k = e.on({ a: 1, b: 2 }, _ => {
+            console.log('this event has object name!');
+          });
+
+          e.trigger({ b: 2, a: 1 });
+        </code>
+        <button class="button">open your console and click</button>
+      </pre>
+    </li>
   </ol>
 
   <script src="/js/event.js"></script>
