@@ -119,31 +119,40 @@
       </pre>
     </li>
     <li>
-      <b>use no string key</b>
+      <b>Event.removeAll</b>
       <pre>
         <code>
           var e = new Event();
-          e.setPrepare(function (a, b) {
-            for (const key in a) {
-              if (a.hasOwnProperty(key)) {
-                if (a[key] !== b[key]) return false;
-              }
-            }
-          
-            for (const key in b) {
-              if (b.hasOwnProperty(key)) {
-                if (a[key] !== b[key]) return false;
-              }
-            }
-          
-            return true;
+
+          e.on('removeAll', _ => {
+            console.log('this event would trigger twice!');
+          });
+          e.on('removeAll', _ => console.log('trigger'));
+
+          e.trigger('removeAll');
+          e.trigger('removeAll');
+          console.log('removeAll');
+
+          e.removeAll('removeAll');
+          e.trigger('removeAll');
+        </code>
+        <button class="button">open your console and click</button>
+      </pre>
+    </li>
+    <li>
+      <b>use custom compare function</b>
+      <pre>
+        <code>
+          var e = new Event();
+          e.setCompare(function (a, b) {
+            return a.toUpperCase() === b.toUpperCase();
           });
 
-          var k = e.on({ a: 1, b: 2 }, _ => {
-            console.log('this event has object name!');
+          var k = e.on('ABC', _ => {
+            console.log('this event has custom compare function!');
           });
 
-          e.trigger({ b: 2, a: 1 });
+          e.trigger('abc');
         </code>
         <button class="button">open your console and click</button>
       </pre>

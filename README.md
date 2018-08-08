@@ -43,9 +43,8 @@ stop event from continue triggering
     e.trigger('stop') // 3
 *stop should only used in once, or all your callbacks defined later won't be triggered*
 
-**0.1.1 add**
-### remove(eventName)
-remove event handler
+### remove(eventName, handler) *0.1.1 add*
+remove selected event handler
 
     var h = e.once('remove', _ => {
       console.log('remove once');
@@ -57,31 +56,27 @@ remove event handler
     e.remove('remove', h);
     e.trigger('remove'); // remove on
 
-**0.1.1 add**
-### setPrepare(prepareFunction)
+### removeAll(eventName) *0.1.1 add*
+remove all event handler
+
+    e.on('removeAll', _ => console.log('trigger'));
+    e.on('removeAll', _ => console.log('trigger'));
+    e.removeAll('removeAll');
+    e.trigger('removeAll'); // nothing happed
+
+### setPrepare(prepareFunction) *0.1.1 add*
 you can use your own prepare function `function (a, b) {}` to compare eventName
-which means you can use all data structure as eventName
+which means you can use your own name as eventName
 
     var e = new Event();
-      e.setPrepare(function (a, b) {
-      for (const key in a) {
-        if (a.hasOwnProperty(key)) {
-          if (a[key] !== b[key]) return false;
-        }
-      }
-    
-      for (const key in b) {
-        if (b.hasOwnProperty(key)) {
-          if (a[key] !== b[key]) return false;
-        }
-      }
-    
-      return true;
+    e.setPrepare(function (a, b) {
+      return a.toUpperCase() === b.toUpperCase();
     });
 
-    var k = e.on({ a: 1, b: 2 }, _ => {
+    var k = e.on('ABC', _ => {
       console.log('this event has object name!');
     });
 
-    e.trigger({ b: 2, a: 1 }); // this event has object name!
+    e.trigger('abc'); // this event has object name!
 *the default compare function is  `function (a, b) { return a === b; }`*
+*as object key can only be string, the eventName can only be string, but you can convert your own data structure to string*

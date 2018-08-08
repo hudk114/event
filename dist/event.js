@@ -4,10 +4,10 @@
   (global.event = factory());
 }(this, (function () { 'use strict';
 
-  function Event(prepare) {
+  function Event(compare) {
     this.pool = {};
-    // prepare function is used for prepare key
-    this.prepare = prepare;
+    // compare function is used for compare key
+    this.compare = compare;
   }
 
   function E(cb, once) {
@@ -23,11 +23,11 @@
 
   Event.prototype = {
     constructor: Event,
-    setPrepare: function setPrepare(prepare) {
-      this.prepare = prepare;
+    setCompare: function setCompare(compare) {
+      this.compare = compare;
     },
     _getPool: function _getPool(eventName) {
-      var c = typeof this.prepare === 'function' ? this.prepare : function (a, b) {
+      var c = typeof this.compare === 'function' ? this.compare : function (a, b) {
         return a === b;
       };
 
@@ -128,6 +128,10 @@
         return null;
       }
       this._getPool(eventName).list.splice(i, 1);
+    },
+    removeAll: function removeAll(eventName) {
+      var p = this._getPool(eventName);
+      p && (p.list = []);
     }
   };
 
